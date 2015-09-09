@@ -20,7 +20,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'Zask',
-    version = '1.5-dev',
+    version = '1.5',
     license='BSD',
     author = 'J5',
     description = "Basic framework to use with ZeroRPC inspired by Flask",
