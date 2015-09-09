@@ -5,7 +5,11 @@ Here you can see the full list of changes between each Zask release.
 
 [Current]
 ----------------------
- * Set version to 1.5-dev
+ * Set version to 1.6-dev
+
+[1.5]
+ * Fix typo in CHANGES
+ * Move repo to another organization
 
 [1.4]
  * Bump version number to 1.4
