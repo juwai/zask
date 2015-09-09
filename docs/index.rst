@@ -17,7 +17,7 @@ Flask is designed for web application, but Zask is for internal service applicat
 References
 ----------
 
-* `ZeroRPC website <www.zerorpc.io/>`_
+* `ZeroRPC website <http://www.zerorpc.io/>`_
 
 Indices and tables
 ==================
