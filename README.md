@@ -1,11 +1,15 @@
 Zask
 ====
 
-Zask is a framework to work with ZeroRPC. Zask is inspired by Flask, you can consider zask is Flask without `WSGI`, `Jinja2` and `Router` but with ZeroRPC and SQLAlchemy. 
+[![Documentation Status](https://readthedocs.org/projects/zask/badge/?version=latest)](https://readthedocs.org/projects/zask/?badge=latest)
 
-## Document
+Zask is a framework to work with ZeroRPC. Zask is inspired by Flask, you can consider zask is Flask without `WSGI`, `Jinja2` and `Router` but with ZeroRPC and SQLAlchemy.
 
-Build from Sphinx source in the [docs](/docs) folder.
+## Installation
+
+```
+$ pip install zask
+```
 
 ## Tests
 

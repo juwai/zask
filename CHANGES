@@ -3,21 +3,35 @@ Zask Changelog
 
 Here you can see the full list of changes between each Zask release.
 
-[Current]
-----------------------
- * Set version to 1.6-dev
+Version 1.6
+-----------
 
-[1.5]
+release date to be announced
+
+ * update README, add readthedocs badge, add pip install from pypi
+ * try to update zerorpc's version
+ * fix warnings in `setup.py`, such as `url` and ZeroRPC link
+ * make zerorpc client support multiple connecting endpoints
+
+Version 1.5
+-----------
+
+released on September 9th 2015
+
  * Fix typo in CHANGES
  * Move repo to another organization
 
-[1.4]
+Version 1.4
+-----------
+
  * Bump version number to 1.4
  * Make logging level configurable
  * Fix log rotation
  * Update dependences version
 
-[1.3]
+Version 1.3
+-----------
+
  * Bump version number to 1.3
  * Add scope session and related middleware
  * Add default pool_recycle and remove session when shutdown
@@ -25,14 +39,18 @@ Here you can see the full list of changes between each Zask release.
  * Disable heartbeat as default
  * Update documents
 
-[1.2]
+Version 1.2
+-----------
+
  * Bump version number to 1.2
  * Happy New Year 2015
  * Docs update for the access log
  * Upgrade access log
  * Change the way to encode endpoint
 
-[1.1]
+Version 1.1
+-----------
+
  * Bump version number to 1.1
  * Rename release script
  * Update and Create docs for the new feature
@@ -41,7 +59,9 @@ Here you can see the full list of changes between each Zask release.
  * Auto resolve endpoint
  * Add MANIFEST file
 
-[1.0]
+Version 1.0
+-----------
+
  * Bump version number to 1.0
  * Update Makefile and scripts
  * Update SQLAlchemy docs
@@ -50,7 +70,9 @@ Here you can see the full list of changes between each Zask release.
  * Update all the docs. Choose RTD theme
  * Generate docs with Sphinx
 
-[0.1]
+Version 0.1
+-----------
+
  * Bump version to 0.1
  * Update config test
  * Update namespace of zask logger

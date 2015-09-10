@@ -11,23 +11,32 @@ Zask is mostly inspired by Flask.
 Links
 `````
 
-* `ZeroRPC <https://github.com/dotcloud/zerorpc-python>`
+* `ZeroRPC <https://github.com/0rpc/zerorpc-python>`
 
 """
-
+import re
+import ast
 from setuptools import setup, find_packages
+
+
+_version_re = re.compile(r'__version__\s+=\s+(.*)')
+
+with open('zask/__init__.py', 'rb') as f:
+    version = str(ast.literal_eval(_version_re.search(
+        f.read().decode('utf-8')).group(1)))
 
 
 setup(
     name = 'Zask',
-    version = '1.6-dev',
+    version = version,
     license='BSD',
     author = 'J5',
+    url='https://github.com/j-5/zask',
     description = "Basic framework to use with ZeroRPC inspired by Flask",
     long_description=__doc__,
     packages = find_packages(),
     install_requires = [
-        'zerorpc==0.4.4',
+        'zerorpc==0.5.1',
         'sqlalchemy>=0.9.8, <1.0',
         'oursql>=0.9.3, <1.0'
     ],

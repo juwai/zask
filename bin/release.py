@@ -19,21 +19,39 @@ import re
 from datetime import datetime, date
 from subprocess import Popen, PIPE
 
-def get_current_version():
-    try:
-        release = pkg_resources.get_distribution('Zask').version
-    except pkg_resources.DistributionNotFound:
-        print 'To build the documentation, The distribution information of Zask'
-        print 'Has to be available.  Either install the package into your'
-        print 'development environment or run "setup.py develop" to setup the'
-        print 'metadata.  A virtualenv is recommended!'
-        sys.exit(1)
+_date_clean_re = re.compile(r'(\d+)(st|nd|rd|th)')
 
-    if '-dev' in release:
-        release = release.split('-dev')[0]
 
-    version = '.'.join(release.split('.')[:2])
-    return version
+def parse_changelog():
+    with open('CHANGES') as f:
+        lineiter = iter(f)
+        for line in lineiter:
+            match = re.search('^Version\s+(.*)', line.strip())
+
+            if match is None:
+                continue
+
+            version = match.group(1).strip()
+            if lineiter.next().count('-') != len(match.group(0)):
+                continue
+
+            while 1:
+                change_info = lineiter.next().strip()
+                if change_info:
+                    break
+
+            match = re.search(r'released on (.*)', change_info)
+            if match is None:
+                continue
+
+            datestr = match.groups()
+            return version, parse_date(datestr)
+
+
+def parse_date(string):
+    string = _date_clean_re.sub(r'\1', string)
+    return datetime.strptime(string, '%B %d %Y')
+
 
 def bump_version(version):
     try:
@@ -71,9 +89,15 @@ def set_setup_version(version):
     info('Setting setup.py version to %s', version)
     set_filename_version('setup.py', version, 'version')
 
+
+def build_and_upload():
+    Popen([sys.executable, 'setup.py' , 'sdist', 'upload', '-r', 'pypi']).wait()
+
+
 def fail(message, *args):
     print >> sys.stderr, 'Error:', message % args
     sys.exit(1)
+
 
 def info(message, *args):
     print >> sys.stderr, message % args
@@ -100,24 +124,28 @@ def make_git_tag(tag):
 def main():
     os.chdir(os.path.join(os.path.dirname(__file__), '..'))
 
-    version = get_current_version()
+    version, release_date = parse_changelog()
     dev_version = bump_version(version) + '-dev'
 
-    info('Releasing %s', version)
+    info('Releasing %s, release date %s',
+         version, release_date.strftime('%d/%m/%Y'))
     tags = get_git_tags()
 
     if version in tags:
         fail('Version "%s" is already tagged', version)
 
+    if release_date.date() != date.today():
+        fail('Release date is not today (%s != %s)',
+             release_date.date(), date.today())
+
     if not git_is_clean():
         fail('You have uncommitted changes in git')
 
     set_init_version(version)
-    set_setup_version(version)
     make_git_commit('Bump version number to %s', version)
     make_git_tag(version)
+    build_and_upload()
     set_init_version(dev_version)
-    set_setup_version(dev_version)
 
 
 if __name__ == '__main__':
