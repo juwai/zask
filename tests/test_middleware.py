@@ -85,6 +85,10 @@ def test_config_endpoint_2():
         '1.0': endpoint,
         'default': '1.0'
     }
+    app.config['ZERORPC_SOME_SERVICE_CLIENT'] = {
+        '1.0': [endpoint], # changes since v1.6
+        'default': '1.0'
+    }
     rpc = ZeroRPC(app, middlewares=[CONFIG_ENDPOINT_MIDDLEWARE])
 
     class Srv(object):
@@ -97,11 +101,11 @@ def test_config_endpoint_2():
     srv = rpc.Server(Srv())
     gevent.spawn(srv.run)
 
-    client = rpc.Client('some_service')
+    client = rpc.Client('some_service_client')
     assert client.hello() == 'world'
 
     with pytest.raises(MissingConfigException):
-        client = rpc.Client('some_service', version='2.0')
+        client = rpc.Client('some_service_client', version='2.0')
 
     client.close()
     srv.close()
@@ -145,13 +149,13 @@ def test_custom_header():
 
     app.config['ZERORPC_SOME_SERVICE']['default'] = '1.0'
     with pytest.raises(zerorpc.RemoteError) as excinfo:
-        client.hello() 
+        client.hello()
     assert 'VersionNotMatchException' in str(excinfo.value)
 
     app.config['ZERORPC_SOME_SERVICE']['default'] = '2.0'
     app.config['ZERORPC_SOME_SERVICE']['access_key'] = 'key_error'
     with pytest.raises(zerorpc.RemoteError) as excinfo:
-        client.hello() 
+        client.hello()
     assert 'NoSuchAccessKeyException' in str(excinfo.value)
 
     app.config['ZERORPC_SOME_SERVICE']['client_keys'] = None

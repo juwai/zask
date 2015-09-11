@@ -11,6 +11,7 @@
 
 import time
 import inspect
+import random
 
 from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO, ERROR
 from logging.handlers import TimedRotatingFileHandler
@@ -119,7 +120,12 @@ class ConfigMiddleware(object):
     def get_endpoint(self, name, version):
         config_name = self._get_config_name(name)
         version = self.get_version(name, version)
-        return self.app.config[config_name][version]
+        config = self.app.config[config_name][version]
+
+        if isinstance(config, list):
+            return random.choice(config)
+        else:
+            return config
 
     def get_access_key(self, name):
         config_name = self._get_config_name(name)
@@ -242,6 +248,10 @@ class ZeroRPC(object):
 
         app.config['ZERORPC_SOME_SERVICE'] = {
             '1.0': endpoint,
+            '2.0': [ # set list if you have multiple endpoints
+                endpoint1,
+                endpoint2
+            ]
             'default': '1.0'
         }
         client = rpc.Client('some_service')
