@@ -397,7 +397,7 @@ class _Client(zerorpc.Client):
                 'service_name': self._connect_to,
                 'service_version': self._service_version
             })
-        request_event = channel.create_event(method, args, xheader)
+        request_event = channel.new_event(method, args, xheader)
         self._context.hook_client_before_request(request_event)
         return request_event
 
