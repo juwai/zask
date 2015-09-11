@@ -6,7 +6,7 @@ Here you can see the full list of changes between each Zask release.
 Version 1.6
 -----------
 
-release date to be announced
+released on September 11th 2015
 
  * update README, add readthedocs badge, add pip install from pypi
  * try to update zerorpc's version

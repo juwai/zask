@@ -44,7 +44,7 @@ def parse_changelog():
             if match is None:
                 continue
 
-            datestr = match.groups()
+            datestr = match.groups()[0]
             return version, parse_date(datestr)
 
 
