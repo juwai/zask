@@ -11,7 +11,6 @@
 
 import time
 import inspect
-import random
 
 from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO, ERROR
 from logging.handlers import TimedRotatingFileHandler
@@ -54,8 +53,8 @@ def _log(cls_name, func):
         start = _milli_time()
         result = func(*args, **kwargs)
         log = '"%s" - "%s" - OK - %dms' % (cls_name,
-                                      func.__name__,
-                                      _milli_time() - start)
+                                           func.__name__,
+                                           _milli_time() - start)
         access_logger.info(log, extra={'access_key': None})
         return result
     return wrapped
@@ -120,12 +119,7 @@ class ConfigMiddleware(object):
     def get_endpoint(self, name, version):
         config_name = self._get_config_name(name)
         version = self.get_version(name, version)
-        config = self.app.config[config_name][version]
-
-        if isinstance(config, list):
-            return random.choice(config)
-        else:
-            return config
+        return self.app.config[config_name][version]
 
     def get_access_key(self, name):
         config_name = self._get_config_name(name)
@@ -144,8 +138,15 @@ class ConfigEndpointMiddleware(ConfigMiddleware):
     """
 
     def resolve_endpoint(self, endpoint):
-        name, version = HandleEndpoint.decode(endpoint)
-        return self.get_endpoint(name, version)
+        # when configured multiple endpoint,
+        # i don't want sub endpoint also be decoded.
+        # so ignore that and return directly.
+        try:
+            name, version = HandleEndpoint.decode(endpoint)
+        except ValueError:
+            return endpoint
+        else:
+            return self.get_endpoint(name, version)
 
 
 class ConfigCustomHeaderMiddleware(ConfigEndpointMiddleware):
@@ -201,16 +202,16 @@ class AccessLogMiddleware(object):
     def server_after_exec(self, request_event, reply_event):
         start = request_event.header.get('started_at')
         log = '"%s" - "%s" - OK - %dms' % (self._class_name,
-                                      request_event.name,
-                                      _milli_time() - start)
+                                           request_event.name,
+                                           _milli_time() - start)
         access_key = request_event.header.get('access_key', None)
         access_logger.info(log, extra={'access_key': access_key})
 
     def server_inspect_exception(self, request_event, reply_event, task_context, exc_infos):
         exc_type, exc_value, exc_traceback = exc_infos
         log = '"%s" - "%s" - ERROR - %s' % (self._class_name,
-                                    request_event.name,
-                                    exc_type.__name__)
+                                            request_event.name,
+                                            exc_type.__name__)
         access_key = request_event.header.get('access_key', None)
         access_logger.info(log, extra={'access_key': access_key})
 
@@ -369,7 +370,6 @@ class _Server(zerorpc.Server):
                 instance.set_server_version(methods.__version__)
             if isinstance(instance, AccessLogMiddleware):
                 instance.set_class_name(methods.__class__.__name__)
-
 
 
 class _Client(zerorpc.Client):

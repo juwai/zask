@@ -78,15 +78,22 @@ def test_config_endpoint_1():
     srv.close()
 
 
-def test_config_endpoint_2():
+def test_config_multiple_endpoints():
     app = Zask(__name__)
     endpoint = random_ipc_endpoint()
+    another_endpoint = random_ipc_endpoint()
+
     app.config['ZERORPC_SOME_SERVICE'] = {
         '1.0': endpoint,
-        'default': '1.0'
+    }
+    app.config['ZERORPC_SOME_SERVICE_2'] = {
+        '1.0': another_endpoint
     }
     app.config['ZERORPC_SOME_SERVICE_CLIENT'] = {
-        '1.0': [endpoint], # changes since v1.6
+        '1.0': [
+            endpoint,
+            another_endpoint
+        ],
         'default': '1.0'
     }
     rpc = ZeroRPC(app, middlewares=[CONFIG_ENDPOINT_MIDDLEWARE])
@@ -96,29 +103,44 @@ def test_config_endpoint_2():
         __service_name__ = "some_service"
 
         def hello(self):
-            return 'world'
+            return 'i am server 1'
+
+    class AnotherSrv(object):
+        __version__ = "1.0"
+        __service_name__ = "some_service_2"
+
+        def hello(self):
+            return 'i am server 2'
 
     srv = rpc.Server(Srv())
+    another_srv = rpc.Server(AnotherSrv())
     gevent.spawn(srv.run)
+    gevent.spawn(another_srv.run)
 
     client = rpc.Client('some_service_client')
-    assert client.hello() == 'world'
+    for i in range(5):
+        who_i_am = client.hello()
+        app.logger.debug(who_i_am)
+        assert who_i_am == 'i am server 1' or who_i_am == 'i am server 2'
 
     with pytest.raises(MissingConfigException):
         client = rpc.Client('some_service_client', version='2.0')
 
     client.close()
     srv.close()
+    another_srv.close()
 
-@access_log
-class Srv(object):
-    __version__ = "2.0"
-    __service_name__ = "some_service"
-
-    def hello(self):
-        return 'world'
 
 def test_custom_header():
+
+    @access_log
+    class Srv(object):
+        __version__ = "2.0"
+        __service_name__ = "some_service"
+
+        def hello(self):
+            return 'world'
+
     app = Zask(__name__)
     endpoint = random_ipc_endpoint()
     app.config['DEBUG'] = False # for testing accesslog
