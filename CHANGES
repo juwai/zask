@@ -3,12 +3,21 @@ Zask Changelog
 
 Here you can see the full list of changes between each Zask release.
 
+Version 1.8
+-----------
+
+release date not anounced
+
+* integrate with travis-ci
+
+
 Version 1.7
 -----------
 
-release date not announced
+released on September 17th 2015
 
-* integrate with travis-ci
+* update README
+* natively support multiple endpoints configure
 
 Version 1.6
 -----------
