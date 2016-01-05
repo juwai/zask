@@ -3,6 +3,7 @@
 __version__ = '1.8'
 
 import gevent
+from gevent.local import local
 
 from zask.config import Config
 from zask.utils import get_root_path
@@ -36,6 +37,9 @@ class Zask(object):
 
 
 class LocalContext(object):
+
+    def __init__(self):
+        self.stash = local()
 
     def get_request_cxt(self):
         return gevent.getcurrent()
