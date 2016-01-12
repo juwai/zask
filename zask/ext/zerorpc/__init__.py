@@ -28,9 +28,13 @@ from zask.logging import debug_handler, production_handler
 
 access_logger = getLogger(__name__)
 
+# NCSA Combined Log Format + request time + uuid
 ACCESS_LOG_FORMAT = (
-    '[%(asctime)s] - %(access_key)s - %(uuid)s - %(message)s'
+    '%(host)s %(identifier)s %(username)s %(asctime)s %(message)s ' + \
+    '%(status_code)s %(bytes)s %(referrer)s %(user_agent)s %(cookies)s ' + \
+    '%(request_time)d %(uuid)s'
 )
+ACCESS_LOG_DATETIME_FORMAT = '[%d/%b/%Y:%H:%M:%S %z]'
 
 CONFIG_ENDPOINT_MIDDLEWARE = 'file'
 CONFIG_CUSTOME_HEADER_MIDDLEWARE = 'header'
@@ -244,21 +248,39 @@ class AccessLogMiddleware(object):
 
     def server_after_exec(self, request_event, reply_event):
         start = request_event.header.get('started_at')
-        log = '"%s" - "%s" - OK - %dms' % (self._class_name,
-                                           request_event.name,
-                                           _milli_time() - start)
-        access_key = request_event.header.get('access_key', None)
-        uuid = request_event.header.get('uuid', None)
-        access_logger.info(log, extra={'access_key': access_key, 'uuid': uuid})
+        message = '"%s %s"' % (self._class_name, request_event.name)
+        access_key = request_event.header.get('access_key', '-')
+        uuid = request_event.header.get('uuid', '-')
+        access_logger.info(message, extra={
+            'host': '-',
+            'identifier': '-',
+            'username': access_key,
+            'status_code': 'OK',
+            'bytes': '-',
+            'referrer': '-',
+            'user_agent': '-',
+            'cookies': '-',
+            'request_time': _milli_time() - start,
+            'uuid': uuid,
+        })
 
     def server_inspect_exception(self, request_event, reply_event, task_context, exc_infos):
-        exc_type, exc_value, exc_traceback = exc_infos
-        log = '"%s" - "%s" - ERROR - %s' % (self._class_name,
-                                            request_event.name,
-                                            exc_type.__name__)
-        access_key = request_event.header.get('access_key', None)
-        uuid = request_event.header.get('uuid', None)
-        access_logger.info(log, extra={'access_key': access_key, 'uuid': uuid})
+        start = request_event.header.get('started_at')
+        message = '"%s %s"' % (self._class_name, request_event.name)
+        access_key = request_event.header.get('access_key', '-')
+        uuid = request_event.header.get('uuid', '-')
+        access_logger.info(message, extra={
+            'host': '-',
+            'identifier': '-',
+            'username': access_key,
+            'status_code': 'ERROR',
+            'bytes': '-',
+            'referrer': '-',
+            'user_agent': '-',
+            'cookies': '-',
+            'request_time': _milli_time() - start,
+            'uuid': uuid,
+        })
 
 
 class ZeroRPC(object):
@@ -376,7 +398,8 @@ class ZeroRPC(object):
             error_handler = production_handler(self.app.config)
 
         access_handler.setLevel(INFO)
-        access_handler.setFormatter(Formatter(ACCESS_LOG_FORMAT))
+        access_handler.setFormatter(Formatter(ACCESS_LOG_FORMAT,
+                                              ACCESS_LOG_DATETIME_FORMAT))
         access_logger.setLevel(INFO)
         del access_logger.handlers[:]
         access_logger.addHandler(access_handler)
