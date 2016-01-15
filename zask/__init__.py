@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '1.9'
+__version__ = '1.9.1'
 
 import gevent
 from gevent.local import local
