@@ -11,6 +11,7 @@
 
 import time
 import inspect
+import uuid
 
 from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO, ERROR
 from logging.handlers import TimedRotatingFileHandler
@@ -22,19 +23,26 @@ from zerorpc.channel import BufferedChannel, logger as channel_logger
 from zerorpc.gevent_zmq import logger as gevent_logger
 from zerorpc.core import logger as core_logger
 
+from zask import _request_ctx
 from zask.logging import debug_handler, production_handler
 
 access_logger = getLogger(__name__)
 
+# NCSA Combined Log Format + request time + uuid
 ACCESS_LOG_FORMAT = (
-    '[%(asctime)s] - %(access_key)s - %(message)s'
+    '%(host)s %(identifier)s %(username)s %(asctime)s %(message)s ' + \
+    '%(status_code)s %(bytes)s %(referrer)s %(user_agent)s %(cookies)s ' + \
+    '%(request_time)d %(uuid)s'
 )
+ACCESS_LOG_DATETIME_FORMAT = '[%d/%b/%Y:%H:%M:%S %z]'
 
 CONFIG_ENDPOINT_MIDDLEWARE = 'file'
 CONFIG_CUSTOME_HEADER_MIDDLEWARE = 'header'
 ACCESS_LOG_MIDDLEWARE = 'access_log'
+REQUEST_CHAIN_MIDDLEWARE = 'uuid'
 DEFAULT_MIDDLEWARES = [
     CONFIG_CUSTOME_HEADER_MIDDLEWARE,
+    REQUEST_CHAIN_MIDDLEWARE,
     ACCESS_LOG_MIDDLEWARE
 ]
 
@@ -182,6 +190,45 @@ class ConfigCustomHeaderMiddleware(ConfigEndpointMiddleware):
                 raise NoSuchAccessKeyException(event_header.get('access_key'))
 
 
+class RequestChainMiddleware(object):
+    """Generate UUID for requests and store in greenlet's local storage
+    """
+    def __init__(self, app):
+        self.app = app
+
+    def get_uuid(self):
+        if not hasattr(_request_ctx.stash, 'uuid'):
+            setattr(_request_ctx.stash, 'uuid', str(uuid.uuid1()))
+        return _request_ctx.stash.uuid
+
+    def set_uuid(self, uuid):
+        setattr(_request_ctx.stash, 'uuid', uuid)
+
+    def clear_uuid(self):
+        if hasattr(_request_ctx.stash, 'uuid'):
+            delattr(_request_ctx.stash, 'uuid')
+
+    def server_before_exec(self, request_event):
+        if not request_event.header.get('uuid'):
+            request_event.header.update({
+                'uuid': self.get_uuid(),
+            })
+        else:
+            self.set_uuid(request_event.header.get('uuid'))
+
+    def server_after_exec(self, request_event, reply_event):
+        self.clear_uuid()
+
+    def server_inspect_exception(self, request_event, reply_event, task_context, exc_infos):
+        self.clear_uuid()
+
+    def client_before_request(self, event):
+        if not event.header.get('uuid'):
+            event.header.update({
+                'uuid': self.get_uuid(),
+            })
+
+
 class AccessLogMiddleware(object):
 
     """This can't be used before initialize the logger.
@@ -201,19 +248,39 @@ class AccessLogMiddleware(object):
 
     def server_after_exec(self, request_event, reply_event):
         start = request_event.header.get('started_at')
-        log = '"%s" - "%s" - OK - %dms' % (self._class_name,
-                                           request_event.name,
-                                           _milli_time() - start)
-        access_key = request_event.header.get('access_key', None)
-        access_logger.info(log, extra={'access_key': access_key})
+        message = '"%s %s"' % (self._class_name, request_event.name)
+        access_key = request_event.header.get('access_key', '-')
+        uuid = request_event.header.get('uuid', '-')
+        access_logger.info(message, extra={
+            'host': '-',
+            'identifier': '-',
+            'username': access_key,
+            'status_code': 'OK',
+            'bytes': '-',
+            'referrer': '-',
+            'user_agent': '-',
+            'cookies': '-',
+            'request_time': _milli_time() - start,
+            'uuid': uuid,
+        })
 
     def server_inspect_exception(self, request_event, reply_event, task_context, exc_infos):
-        exc_type, exc_value, exc_traceback = exc_infos
-        log = '"%s" - "%s" - ERROR - %s' % (self._class_name,
-                                            request_event.name,
-                                            exc_type.__name__)
-        access_key = request_event.header.get('access_key', None)
-        access_logger.info(log, extra={'access_key': access_key})
+        start = request_event.header.get('started_at')
+        message = '"%s %s"' % (self._class_name, request_event.name)
+        access_key = request_event.header.get('access_key', '-')
+        uuid = request_event.header.get('uuid', '-')
+        access_logger.info(message, extra={
+            'host': '-',
+            'identifier': '-',
+            'username': access_key,
+            'status_code': 'ERROR',
+            'bytes': '-',
+            'referrer': '-',
+            'user_agent': '-',
+            'cookies': '-',
+            'request_time': _milli_time() - start,
+            'uuid': uuid,
+        })
 
 
 class ZeroRPC(object):
@@ -307,6 +374,9 @@ class ZeroRPC(object):
         elif CONFIG_ENDPOINT_MIDDLEWARE in self._middlewares:
             context.register_middleware(ConfigEndpointMiddleware(self.app))
 
+        if REQUEST_CHAIN_MIDDLEWARE in self._middlewares:
+            context.register_middleware(RequestChainMiddleware(self.app))
+
         if ACCESS_LOG_MIDDLEWARE in self._middlewares:
             context.register_middleware(AccessLogMiddleware(self.app))
         _Server.__context__ = _Client.__context__ = context
@@ -328,7 +398,8 @@ class ZeroRPC(object):
             error_handler = production_handler(self.app.config)
 
         access_handler.setLevel(INFO)
-        access_handler.setFormatter(Formatter(ACCESS_LOG_FORMAT))
+        access_handler.setFormatter(Formatter(ACCESS_LOG_FORMAT,
+                                              ACCESS_LOG_DATETIME_FORMAT))
         access_logger.setLevel(INFO)
         del access_logger.handlers[:]
         access_logger.addHandler(access_handler)
