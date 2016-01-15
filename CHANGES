@@ -3,6 +3,14 @@ Zask Changelog
 
 Here you can see the full list of changes between each Zask release.
 
+Version 1.9
+-----------
+
+released on January 15th 2016
+
+* request chain tracking with uuid
+* access log format change to NCSA combined + request time + uuid
+
 Version 1.8
 -----------
 
