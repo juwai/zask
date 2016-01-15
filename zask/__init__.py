@@ -37,6 +37,14 @@ class Zask(object):
 
 
 class LocalContext(object):
+    """
+    Store data in local greenlet context.
+
+    > Gevent also allows you to specify data which is local to the greenlet context.
+    > Internally, this is implemented as a global lookup which addresses a private namespace keyed by the greenlet's getcurrent() value.
+
+    See http://sdiehl.github.io/gevent-tutorial/#thread-locals for information.
+    """
 
     def __init__(self):
         self.stash = local()
