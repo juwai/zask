@@ -23,6 +23,25 @@ If you have `tox`, then:
 $ tox
 ```
 
+## Release
+
+Follow these steps to release on pypi.
+
+1. Create ~/.pypirc with this content. Fill in username and password.
+```
+[distutils]
+index-servers =
+    pypi
+
+[pypi]
+username:<username>
+password:<password>
+```
+2. Update [CHANGES](CHANGES) with new version number and describe the changes.
+3. Set new version number in `zask/__init__.py`
+4. Run `python bin/release.py`
+5. Push release tag to Github
+
 ## Changes
 
 see [Changes](/CHANGES).
