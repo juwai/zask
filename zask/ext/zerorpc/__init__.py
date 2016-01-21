@@ -16,6 +16,13 @@ import uuid
 from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO, ERROR
 from logging.handlers import TimedRotatingFileHandler
 
+# Because the time module has a problem with timezones, we now format all log
+# message dates in UTC. We tried replacing the Formatter using tzlocal but it
+# was very slow calling it the first time. The delay is somewhere in the range
+# of 3-4 seconds. This is not acceptable in a production application. So until
+# we find a better solution, this is the compromise.
+Formatter.converter = time.gmtime
+
 import gevent
 import zerorpc
 from zerorpc.heartbeat import HeartBeatOnChannel
@@ -34,7 +41,7 @@ ACCESS_LOG_FORMAT = (
     '%(status_code)s %(bytes)s %(referrer)s %(user_agent)s %(cookies)s ' + \
     '%(request_time)d %(uuid)s'
 )
-ACCESS_LOG_DATETIME_FORMAT = '[%d/%b/%Y:%H:%M:%S %z]'
+ACCESS_LOG_DATETIME_FORMAT = '[%d/%b/%Y:%H:%M:%S +0000]' # Hard coded for UTC
 
 CONFIG_ENDPOINT_MIDDLEWARE = 'file'
 CONFIG_CUSTOME_HEADER_MIDDLEWARE = 'header'
