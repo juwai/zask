@@ -3,6 +3,13 @@ Zask Changelog
 
 Here you can see the full list of changes between each Zask release.
 
+Version 1.9.2
+-------------
+
+released on January 21st 2016
+
+* fix access log timestamp timezone (always utc)
+
 Version 1.9.1
 -------------
 
