@@ -13,7 +13,6 @@ import time
 import inspect
 import uuid
 
-from functools import partial
 from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO, ERROR
 from logging.handlers import TimedRotatingFileHandler
 
