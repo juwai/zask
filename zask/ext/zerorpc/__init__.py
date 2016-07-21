@@ -13,6 +13,7 @@ import time
 import inspect
 import uuid
 
+from functools import partial
 from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO, ERROR
 from logging.handlers import TimedRotatingFileHandler
 
@@ -47,10 +48,12 @@ CONFIG_ENDPOINT_MIDDLEWARE = 'file'
 CONFIG_CUSTOME_HEADER_MIDDLEWARE = 'header'
 ACCESS_LOG_MIDDLEWARE = 'access_log'
 REQUEST_CHAIN_MIDDLEWARE = 'uuid'
+REQUEST_EVENT_MIDDLEWARE = 'event'
 DEFAULT_MIDDLEWARES = [
     CONFIG_CUSTOME_HEADER_MIDDLEWARE,
     REQUEST_CHAIN_MIDDLEWARE,
-    ACCESS_LOG_MIDDLEWARE
+    ACCESS_LOG_MIDDLEWARE,
+    REQUEST_EVENT_MIDDLEWARE
 ]
 
 
@@ -235,6 +238,15 @@ class RequestChainMiddleware(object):
                 'uuid': self.get_uuid(),
             })
 
+class RequestEventMiddleware(object):
+    """Exposes the request_event to the object being passed to Server()
+    via self.get_request_event() from a service endpoint.
+    """
+
+    def server_before_exec(self, request_event):
+        """Injects the request_event into greenlet's local storage context.
+        """
+        setattr(_request_ctx.stash, 'request_event', request_event)
 
 class AccessLogMiddleware(object):
 
@@ -386,6 +398,10 @@ class ZeroRPC(object):
 
         if ACCESS_LOG_MIDDLEWARE in self._middlewares:
             context.register_middleware(AccessLogMiddleware(self.app))
+
+        if REQUEST_EVENT_MIDDLEWARE in self._middlewares:
+            context.register_middleware(RequestEventMiddleware())
+
         _Server.__context__ = _Client.__context__ = context
 
     def register_middleware(self, middleware):
@@ -436,6 +452,10 @@ class _Server(zerorpc.Server):
                                 heartbeat=heartbeat,
                                 **kargs)
 
+        # Inject get_request_event *after* Server constructor so that
+        # it's not exposed to the RPC from the outside.
+        methods.get_request_event = self._get_request_event
+
         for instance in context_._middlewares:
             if isinstance(instance, ConfigEndpointMiddleware):
                 if methods.__version__ is None:
@@ -448,6 +468,16 @@ class _Server(zerorpc.Server):
                 instance.set_server_version(methods.__version__)
             if isinstance(instance, AccessLogMiddleware):
                 instance.set_class_name(methods.__class__.__name__)
+
+    def _get_request_event(self):
+        """Returns the request_event from the local greenlet storage.
+        Requires RequestEventMiddleware to be enabled to work.
+        """
+        enabled_middlewares = [mw.__class__.__name__ for mw in
+                               self.__context__._middlewares]
+        if 'RequestEventMiddleware' not in enabled_middlewares:
+            raise MissingMiddlewareException('RequestEventMiddleware')
+        return getattr(_request_ctx.stash, 'request_event')
 
 
 class _Client(zerorpc.Client):
@@ -585,3 +615,12 @@ class NoNameException(Exception):
 
     def __str__(self):
         return "__service_name__ is needed for ZeroRPC server"
+
+
+class MissingMiddlewareException(Exception):
+
+    def __init__(self, middleware):
+        self.middleware = middleware
+
+    def __str__(self):
+        return "Missing required middleware %s." % self.middleware
