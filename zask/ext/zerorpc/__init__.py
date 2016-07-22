@@ -622,4 +622,4 @@ class MissingMiddlewareException(Exception):
         self.middleware = middleware
 
     def __str__(self):
-        return "Missing required middleware %s." % self.middleware
+        return 'Missing required middleware {}.'.format(self.middleware)
