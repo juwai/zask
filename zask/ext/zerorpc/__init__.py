@@ -617,6 +617,9 @@ class NoNameException(Exception):
 
 
 class MissingMiddlewareException(Exception):
+    """Raised when Zask tries to invoke a functionality provided
+    by a specific middleware, but that middleware is not loaded.
+    """
 
     def __init__(self, middleware):
         self.middleware = middleware
