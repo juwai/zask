@@ -3,6 +3,15 @@ Zask Changelog
 
 Here you can see the full list of changes between each Zask release.
 
+Version 1.9.3
+-------------
+
+released on July 28th 2016
+
+* Added RequestEventMiddleware
+* request_event now accessible inside service endpoint via get_request_event()
+
+
 Version 1.9.2
 -------------
 
