@@ -13,17 +13,25 @@
 import sys
 
 PY2 = sys.version_info[0] == 2
-_identity = lambda x: x
+
+
+def _identity(x):
+    return x
 
 
 if not PY2:
     text_type = str
-    string_types = (str,)
-    integer_types = (int,)
+    string_types = (str, )
+    integer_types = (int, )
 
-    iterkeys = lambda d: iter(d.keys())
-    itervalues = lambda d: iter(d.values())
-    iteritems = lambda d: iter(d.items())
+    def iterkeys(d):
+        return iter(d.keys())
+
+    def itervalues(d):
+        return iter(d.values())
+
+    def iteritems(d):
+        return iter(d.items())
 
     from io import StringIO
 
@@ -39,9 +47,14 @@ else:
     string_types = (str, unicode)
     integer_types = (int, long)
 
-    iterkeys = lambda d: d.iterkeys()
-    itervalues = lambda d: d.itervalues()
-    iteritems = lambda d: d.iteritems()
+    def iterkeys(d):
+        return d.iterkeys()
+
+    def itervalues(d):
+        return d.itervalues()
+
+    def iteritems(d):
+        return d.iteritems()
 
     from cStringIO import StringIO
 
@@ -54,6 +67,7 @@ else:
 
 
 def with_metaclass(meta, *bases):
+
     # This requires a bit of explanation: the basic idea is to make a
     # dummy metaclass for one level of class instantiation that replaces
     # itself with the actual metaclass.  Because of internal type checks
@@ -66,12 +80,12 @@ def with_metaclass(meta, *bases):
     class metaclass(meta):
         __call__ = type.__call__
         __init__ = type.__init__
+
         def __new__(cls, name, this_bases, d):
             if this_bases is None:
                 return type.__new__(cls, name, (), d)
             return meta(name, bases, d)
     return metaclass('temporary_class', None, {})
-
 
 # Certain versions of pypy have a bug where clearing the exception stack
 # breaks the __exit__ function in a very peculiar way.  This is currently
@@ -81,8 +95,10 @@ def with_metaclass(meta, *bases):
 BROKEN_PYPY_CTXMGR_EXIT = False
 if hasattr(sys, 'pypy_version_info'):
     class _Mgr(object):
+
         def __enter__(self):
             return self
+
         def __exit__(self, *args):
             sys.exc_clear()
     try:

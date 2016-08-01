@@ -26,11 +26,13 @@ DEBUG_LOG_FORMAT = (
     '%(message)s\n'
 )
 
+
 def debug_handler():
     handler = StreamHandler()
     handler.setLevel(DEBUG)
     handler.setFormatter(Formatter(DEBUG_LOG_FORMAT))
     return handler
+
 
 def production_handler(config):
     handler = RotatingFileHandler(config['ERROR_LOG'],
@@ -39,6 +41,7 @@ def production_handler(config):
     handler.setLevel(_get_production_logging_level(config))
     handler.setFormatter(Formatter(PROD_LOG_FORMAT))
     return handler
+
 
 def create_logger(config):
     """Creates a logger for the application. Logger's behavior depend on
@@ -57,6 +60,7 @@ def create_logger(config):
 
     logger_.addHandler(handler)
     return logger_
+
 
 def _get_production_logging_level(config):
     config.setdefault('PRODUCTION_LOGGING_LEVEL', 'INFO')

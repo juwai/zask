@@ -8,13 +8,21 @@
     :copyright: (c) 2015 by the J5.
     :license: BSD, see LICENSE for more details.
 """
-
-import time
 import inspect
+import gevent
+import time
 import uuid
 
-from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO, ERROR
+import zerorpc
+from zerorpc.heartbeat import HeartBeatOnChannel
+from zerorpc.channel import BufferedChannel, logger as channel_logger
+from zerorpc.gevent_zmq import logger as gevent_logger
+from zerorpc.core import logger as core_logger
+
+from logging import DEBUG, ERROR, Formatter, getLogger, INFO, StreamHandler
 from logging.handlers import TimedRotatingFileHandler
+from zask import _request_ctx
+from zask.logging import debug_handler, production_handler
 
 # Because the time module has a problem with timezones, we now format all log
 # message dates in UTC. We tried replacing the Formatter using tzlocal but it
@@ -23,25 +31,15 @@ from logging.handlers import TimedRotatingFileHandler
 # we find a better solution, this is the compromise.
 Formatter.converter = time.gmtime
 
-import gevent
-import zerorpc
-from zerorpc.heartbeat import HeartBeatOnChannel
-from zerorpc.channel import BufferedChannel, logger as channel_logger
-from zerorpc.gevent_zmq import logger as gevent_logger
-from zerorpc.core import logger as core_logger
-
-from zask import _request_ctx
-from zask.logging import debug_handler, production_handler
-
 access_logger = getLogger(__name__)
 
 # NCSA Combined Log Format + request time + uuid
 ACCESS_LOG_FORMAT = (
-    '%(host)s %(identifier)s %(username)s %(asctime)s %(message)s ' + \
-    '%(status_code)s %(bytes)s %(referrer)s %(user_agent)s %(cookies)s ' + \
+    '%(host)s %(identifier)s %(username)s %(asctime)s %(message)s ' +
+    '%(status_code)s %(bytes)s %(referrer)s %(user_agent)s %(cookies)s ' +
     '%(request_time)d %(uuid)s'
 )
-ACCESS_LOG_DATETIME_FORMAT = '[%d/%b/%Y:%H:%M:%S +0000]' # Hard coded for UTC
+ACCESS_LOG_DATETIME_FORMAT = '[%d/%b/%Y:%H:%M:%S +0000]'  # Hard coded for UTC
 
 CONFIG_ENDPOINT_MIDDLEWARE = 'file'
 CONFIG_CUSTOME_HEADER_MIDDLEWARE = 'header'
@@ -66,6 +64,7 @@ def _log(cls_name, func):
     """[Deprecated]
     Decorator for every method of server to record simple access log.
     """
+
     def wrapped(*args, **kwargs):
         start = _milli_time()
         result = func(*args, **kwargs)
@@ -180,16 +179,17 @@ class ConfigCustomHeaderMiddleware(ConfigEndpointMiddleware):
 
     def client_before_request(self, event):
         if event.header.get('service_name'):
-            event.header.update({
-                'access_key': self.get_access_key(event.header['service_name']),
-                'service_version':
-                    self.get_version(event.header['service_name'],
-                                     event.header['service_version'])
-            })
+            event.header.update(
+                {
+                    'access_key': self.get_access_key(
+                        event.header['service_name']),
+                    'service_version': self.get_version(
+                        event.header['service_name'],
+                        event.header['service_version'])})
 
     def load_task_context(self, event_header):
-        if event_header.get('service_version') \
-                and event_header.get('service_version') != self._server_version:
+        if event_header.get('service_version') and event_header.get(
+                'service_version') != self._server_version:
             raise VersionNotMatchException(event_header.get('access_key'),
                                            event_header.get('service_version'),
                                            self._server_version)
@@ -202,6 +202,7 @@ class ConfigCustomHeaderMiddleware(ConfigEndpointMiddleware):
 class RequestChainMiddleware(object):
     """Generate UUID for requests and store in greenlet's local storage
     """
+
     def __init__(self, app):
         self.app = app
 
@@ -228,7 +229,12 @@ class RequestChainMiddleware(object):
     def server_after_exec(self, request_event, reply_event):
         self.clear_uuid()
 
-    def server_inspect_exception(self, request_event, reply_event, task_context, exc_infos):
+    def server_inspect_exception(
+            self,
+            request_event,
+            reply_event,
+            task_context,
+            exc_infos):
         self.clear_uuid()
 
     def client_before_request(self, event):
@@ -236,6 +242,7 @@ class RequestChainMiddleware(object):
             event.header.update({
                 'uuid': self.get_uuid(),
             })
+
 
 class RequestEventMiddleware(object):
     """Exposes the request_event to the object being passed to Server()
@@ -246,6 +253,7 @@ class RequestEventMiddleware(object):
         """Injects the request_event into greenlet's local storage context.
         """
         setattr(_request_ctx.stash, 'request_event', request_event)
+
 
 class AccessLogMiddleware(object):
 
@@ -282,7 +290,12 @@ class AccessLogMiddleware(object):
             'uuid': uuid,
         })
 
-    def server_inspect_exception(self, request_event, reply_event, task_context, exc_infos):
+    def server_inspect_exception(
+            self,
+            request_event,
+            reply_event,
+            task_context,
+            exc_infos):
         start = request_event.header.get('started_at')
         message = '"%s %s"' % (self._class_name, request_event.name)
         access_key = request_event.header.get('access_key', '-')
@@ -413,10 +426,8 @@ class ZeroRPC(object):
             access_handler = StreamHandler()
             error_handler = debug_handler()
         else:
-            access_handler = TimedRotatingFileHandler(self.app.config['ZERORPC_ACCESS_LOG'],
-                                                      when='D',
-                                                      interval=1,
-                                                      backupCount=15)
+            access_handler = TimedRotatingFileHandler(
+                self.app.config['ZERORPC_ACCESS_LOG'], when='D', interval=1, backupCount=15)
             error_handler = production_handler(self.app.config)
 
         access_handler.setLevel(INFO)
@@ -493,7 +504,11 @@ class _Client(zerorpc.Client):
         # let this client handle connect all the time by setting
         # connect_to=None
         zerorpc.Client.__init__(
-            self, connect_to=None, context=context_, heartbeat=heartbeat, **kargs)
+            self,
+            connect_to=None,
+            context=context_,
+            heartbeat=heartbeat,
+            **kargs)
         if connect_to:
             connected = False
             # this is tricky

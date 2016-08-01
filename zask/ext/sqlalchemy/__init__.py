@@ -37,9 +37,10 @@ from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from zask import _request_ctx
 from zask.ext.sqlalchemy._compat import iteritems, itervalues, xrange, \
-     string_types
+    string_types
 
 _camelcase_re = re.compile(r'([A-Z]+)(?=[a-z0-9])')
+
 
 def _make_table(db):
     def _make_table(*args, **kwargs):
@@ -69,12 +70,14 @@ def _wrap_with_default_query_class(fn):
         return fn(*args, **kwargs)
     return newfn
 
+
 def get_state(app):
     """Gets the state for the application"""
     assert 'sqlalchemy' in app.extensions, \
         'The sqlalchemy extension was not registered to the current ' \
         'application.  Please make sure to call init_app() first.'
     return app.extensions['sqlalchemy']
+
 
 def _include_sqlalchemy(obj):
     for module in sqlalchemy, sqlalchemy.orm:
@@ -87,6 +90,7 @@ def _include_sqlalchemy(obj):
     obj.relation = _wrap_with_default_query_class(obj.relation)
     obj.dynamic_loader = _wrap_with_default_query_class(obj.dynamic_loader)
     obj.event = event
+
 
 def _should_set_tablename(bases, d):
     """Check what values are set by a class and its bases to determine if a
@@ -115,7 +119,8 @@ def _should_set_tablename(bases, d):
     if '__tablename__' in d or '__table__' in d or '__abstract__' in d:
         return False
 
-    if any(v.primary_key for v in itervalues(d) if isinstance(v, sqlalchemy.Column)):
+    if any(v.primary_key for v in itervalues(d)
+           if isinstance(v, sqlalchemy.Column)):
         return True
 
     for base in bases:
@@ -127,6 +132,7 @@ def _should_set_tablename(bases, d):
 
             if isinstance(attr, sqlalchemy.Column) and attr.primary_key:
                 return True
+
 
 class _BoundDeclarativeMeta(DeclarativeMeta):
 
@@ -146,6 +152,7 @@ class _BoundDeclarativeMeta(DeclarativeMeta):
         DeclarativeMeta.__init__(self, name, bases, d)
         if bind_key is not None:
             self.__table__.info['bind_key'] = bind_key
+
 
 class BindSession(SessionBase):
     """The BindSession is the default session that Zask-SQLAlchemy
@@ -173,6 +180,7 @@ class BindSession(SessionBase):
                 return state.db.get_engine(self.app, bind=bind_key)
         return SessionBase.get_bind(self, mapper, clause)
 
+
 class _SQLAlchemyState(object):
     """Remembers configuration for the (db, app) tuple."""
 
@@ -180,6 +188,7 @@ class _SQLAlchemyState(object):
         self.db = db
         self.app = app
         self.connectors = {}
+
 
 class _QueryProperty(object):
 
@@ -193,6 +202,7 @@ class _QueryProperty(object):
                 return type.query_class(mapper, session=self.sa.session())
         except UnmappedClassError:
             return None
+
 
 class _EngineConnector(object):
 
@@ -228,6 +238,7 @@ class _EngineConnector(object):
         self._connected_for = (uri, echo)
         return rv
 
+
 class Model(object):
     """Baseclass for custom user models."""
 
@@ -238,6 +249,7 @@ class Model(object):
     #: an instance of :attr:`query_class`.  Can be used to query the
     #: database for instances of this model.
     query = None
+
 
 class SQLAlchemy(object):
     """This class is used to control the SQLAlchemy integration to one
@@ -491,6 +503,7 @@ class SQLAlchemy(object):
             app and app.config['SQLALCHEMY_DATABASE_URI'] or None
         )
 
+
 class SessionMiddleware(object):
 
     def __init__(self, db):
@@ -499,5 +512,10 @@ class SessionMiddleware(object):
     def server_after_exec(self, request_event, reply_event):
         self.db.session.remove()
 
-    def server_inspect_exception(self, request_event, reply_event, task_context, exc_infos):
+    def server_inspect_exception(
+            self,
+            request_event,
+            reply_event,
+            task_context,
+            exc_infos):
         self.db.session.remove()
