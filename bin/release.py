@@ -35,7 +35,7 @@ def parse_changelog():
             if lineiter.next().count('-') != len(match.group(0)):
                 continue
 
-            while 1:
+            while True:
                 change_info = lineiter.next().strip()
                 if change_info:
                     break
@@ -91,7 +91,7 @@ def set_setup_version(version):
 
 
 def build_and_upload():
-    Popen([sys.executable, 'setup.py' , 'sdist', 'upload', '-r', 'pypi']).wait()
+    Popen([sys.executable, 'setup.py', 'sdist', 'upload', '-r', 'pypi']).wait()
 
 
 def fail(message, *args):
@@ -104,7 +104,8 @@ def info(message, *args):
 
 
 def get_git_tags():
-    return set(Popen(['git', 'tag'], stdout=PIPE).communicate()[0].splitlines())
+    return set(Popen(['git', 'tag'], stdout=PIPE).communicate()[
+               0].splitlines())
 
 
 def git_is_clean():
