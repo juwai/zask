@@ -20,10 +20,12 @@ from zask import Zask
 from zask.ext.zerorpc import init_zerorpc, access_log
 from zask.logging import create_logger
 
+
 def clear_handlers():
     del channel_logger.handlers[:]
     del gevent_logger.handlers[:]
     del core_logger.handlers[:]
+
 
 class TestZeroRPC(unittest.TestCase):
 
@@ -39,7 +41,6 @@ class TestZeroRPC(unittest.TestCase):
     def tearDown(self):
         os.unlink(self.default_config['ERROR_LOG'])
         os.unlink(self.default_config['ZERORPC_ACCESS_LOG'])
-
 
     def test_debug_mode(self):
         clear_handlers()
@@ -58,7 +59,7 @@ class TestZeroRPC(unittest.TestCase):
         app.config = self.default_config
         app.config['DEBUG'] = False
         init_zerorpc(app)
-        
+
         channel_logger.error("error")
         gevent_logger.error("error")
         core_logger.error("error")
@@ -76,6 +77,7 @@ class TestZeroRPC(unittest.TestCase):
 
         @access_log
         class MySrv(object):
+
             def sleep(self):
                 time.sleep(1)
 

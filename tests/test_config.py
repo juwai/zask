@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+import pytest
+
+import os
+
+from zask import Zask
 """
     tests.test_config
     ~~~~~~~~~~~~~~~~~
@@ -14,12 +19,6 @@
     :license: BSD, see LICENSE for more details.
 """
 
-import pytest
-
-import os
-
-from zask import Zask
-
 # config keys used for the TestConfig
 TEST_KEY = 'foo'
 
@@ -28,10 +27,12 @@ def common_object_test(app):
     assert app.config['TEST_KEY'] == 'foo'
     assert 'TestConfig' not in app.config
 
+
 def test_default_config():
     app = Zask(__name__)
     config = app.config
-    assert app.config['DEBUG'] == True
+    assert app.config['DEBUG']
+
 
 def test_config_from_file():
     app = Zask(__name__)
@@ -111,7 +112,8 @@ def test_get_namespace():
     assert 2 == len(foo_options)
     assert 'foo option 1' == foo_options['foo_option_1']
     assert 'foo option 2' == foo_options['foo_option_2']
-    bar_options = app.config.get_namespace('BAR_', lowercase=False, trim_namespace=False)
+    bar_options = app.config.get_namespace(
+        'BAR_', lowercase=False, trim_namespace=False)
     assert 2 == len(bar_options)
     assert 'bar stuff 1' == bar_options['BAR_STUFF_1']
     assert 'bar stuff 2' == bar_options['BAR_STUFF_2']

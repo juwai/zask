@@ -24,7 +24,9 @@ def make_todo_model(db):
             self.pub_date = datetime.utcnow()
     return Todo
 
+
 class BasicSQLAlchemyTestCase(unittest.TestCase):
+
     def setUp(self):
         self.app = Zask(__name__)
         self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
@@ -37,7 +39,7 @@ class BasicSQLAlchemyTestCase(unittest.TestCase):
         self.db.drop_all()
 
     def test_basic_insert(self):
-        
+
         self.db.session.add(self.Todo('First Item', 'The text'))
         self.db.session.add(self.Todo('2nd Item', 'The text'))
         self.db.session.commit()
@@ -47,6 +49,7 @@ class BasicSQLAlchemyTestCase(unittest.TestCase):
 
     def test_helper_api(self):
         self.assertEqual(self.db.metadata, self.db.Model.metadata)
+
 
 class TestAppBound(unittest.TestCase):
 
@@ -58,7 +61,7 @@ class TestAppBound(unittest.TestCase):
         db = sqlalchemy.SQLAlchemy()
         db.init_app(self.app)
         Todo = make_todo_model(db)
-        
+
         db.create_all()
         todo = Todo('Test', 'test')
         db.session.add(todo)
@@ -69,7 +72,7 @@ class TestAppBound(unittest.TestCase):
     def test_app_bound(self):
         db = sqlalchemy.SQLAlchemy(self.app)
         Todo = make_todo_model(db)
-        
+
         db.create_all()
         todo = Todo('Test', 'test')
         db.session.add(todo)
@@ -77,7 +80,9 @@ class TestAppBound(unittest.TestCase):
         self.assertEqual(len(Todo.query.all()), 1)
         db.drop_all()
 
+
 class TablenameTestCase(unittest.TestCase):
+
     def test_name(self):
         app = Zask(__name__)
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
@@ -123,7 +128,9 @@ class TablenameTestCase(unittest.TestCase):
             id = db.Column(db.Integer, primary_key=True)
 
         class Donald(Duck):
-            id = db.Column(db.Integer, db.ForeignKey(Duck.id), primary_key=True)
+            id = db.Column(
+                db.Integer, db.ForeignKey(
+                    Duck.id), primary_key=True)
 
         self.assertEqual(Donald.__tablename__, 'donald')
 
@@ -171,14 +178,18 @@ class TablenameTestCase(unittest.TestCase):
             id = db.Column(db.Integer, primary_key=True)
 
         class IdMixin(object):
+
             @declared_attr
             def id(cls):
-                return db.Column(db.Integer, db.ForeignKey(Duck.id), primary_key=True)
+                return db.Column(
+                    db.Integer, db.ForeignKey(
+                        Duck.id), primary_key=True)
 
         class RubberDuck(IdMixin, Duck):
             pass
 
         self.assertEqual(RubberDuck.__tablename__, 'rubber_duck')
+
 
 class BindsTestCase(unittest.TestCase):
 
@@ -199,8 +210,8 @@ class BindsTestCase(unittest.TestCase):
         app = Zask(__name__)
         app.config['SQLALCHEMY_ENGINE'] = 'sqlite://'
         app.config['SQLALCHEMY_BINDS'] = {
-            'foo':      'sqlite:///' + db1,
-            'bar':      'sqlite:///' + db2
+            'foo': 'sqlite:///' + db1,
+            'bar': 'sqlite:///' + db2
         }
         db = sqlalchemy.SQLAlchemy(app)
 
@@ -268,6 +279,7 @@ class BindsTestCase(unittest.TestCase):
 
         db.drop_all()
 
+
 class DefaultQueryClassTestCase(unittest.TestCase):
 
     def test_default_query_class(self):
@@ -278,7 +290,9 @@ class DefaultQueryClassTestCase(unittest.TestCase):
 
         class Parent(db.Model):
             id = db.Column(db.Integer, primary_key=True)
-            children = db.relationship("Child", backref = "parents", lazy='dynamic')
+            children = db.relationship(
+                "Child", backref="parents", lazy='dynamic')
+
         class Child(db.Model):
             id = db.Column(db.Integer, primary_key=True)
             parent_id = db.Column(db.Integer, db.ForeignKey('parent.id'))
@@ -288,6 +302,7 @@ class DefaultQueryClassTestCase(unittest.TestCase):
         self.assertEqual(type(Parent.query), BaseQuery)
         self.assertEqual(type(Child.query), BaseQuery)
         self.assertTrue(isinstance(p.children, BaseQuery))
+
 
 class SessionScopingTestCase(unittest.TestCase):
 
@@ -314,7 +329,9 @@ class SessionScopingTestCase(unittest.TestCase):
         def scopefunc():
             return id(dict())
 
-        db = sqlalchemy.SQLAlchemy(app, session_options=dict(scopefunc=scopefunc))
+        db = sqlalchemy.SQLAlchemy(
+            app, session_options=dict(
+                scopefunc=scopefunc))
 
         class FOOBar(db.Model):
             id = db.Column(db.Integer, primary_key=True)
@@ -329,4 +346,3 @@ class SessionScopingTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
