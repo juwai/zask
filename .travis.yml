@@ -14,12 +14,12 @@ script:
     - python setup.py test
 
 branches:
-#  only:
-#    - master
+  only:
+    - master
 
-#notifications:
-#  slack:
-#    rooms:
-#      - juwai:BnihlKlSqagkR1FS7agVecXg
-#    on_success: never
-#    on_failure: always
+notifications:
+  slack:
+    rooms:
+      - juwai:BnihlKlSqagkR1FS7agVecXg
+    on_success: never
+    on_failure: always
