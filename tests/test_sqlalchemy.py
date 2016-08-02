@@ -135,7 +135,8 @@ class TablenameTestCase(unittest.TestCase):
         self.assertEqual(Donald.__tablename__, 'donald')
 
     def test_mixin_name(self):
-        """Primary key provided by mixin should still allow model to set tablename."""
+        """Primary key provided by mixin should still allow
+           model to set tablename."""
 
         app = Zask(__name__)
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
@@ -151,7 +152,8 @@ class TablenameTestCase(unittest.TestCase):
         self.assertEqual(Duck.__tablename__, 'duck')
 
     def test_abstract_name(self):
-        """Abstract model should not set a name.  Subclass should set a name."""
+        """Abstract model should not set a name.
+           Subclass should set a name."""
 
         app = Zask(__name__)
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
@@ -168,7 +170,9 @@ class TablenameTestCase(unittest.TestCase):
         self.assertEqual(Duck.__tablename__, 'duck')
 
     def test_complex_inheritance(self):
-        """Joined table inheritance, but the new primary key is provided by a mixin, not directly on the class."""
+        """Joined table inheritance,
+           but the new primary key is provided by a mixin,
+           not directly on the class."""
 
         app = Zask(__name__)
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
@@ -340,7 +344,8 @@ class SessionScopingTestCase(unittest.TestCase):
 
         fb = FOOBar()
         db.session.add(fb)
-        assert fb not in db.session  # because a new scope is generated on each call
+        assert fb not in db.session
+        # ^ because a new scope is generated on each call
 
         db.drop_all()
 
