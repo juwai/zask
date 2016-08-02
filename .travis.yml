@@ -1,0 +1,25 @@
+sudo: false
+language: python
+
+python:
+  - "2.7"
+
+install:
+    - pip install pep8
+
+before_script:
+    - "pep8 ./zack ./tests"
+
+script:
+    - python setup.py test
+
+branches:
+  only:
+    - master
+
+notifications:
+  slack:
+    rooms:
+      - juwai:BnihlKlSqagkR1FS7agVecXg
+    on_success: never
+    on_failure: always
