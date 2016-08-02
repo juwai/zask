@@ -93,21 +93,27 @@ def _include_sqlalchemy(obj):
 
 
 def _should_set_tablename(bases, d):
-    """Check what values are set by a class and its bases to determine if a
+    """Check what values are set by a class and
+    its bases to determine if a
     tablename should be automatically generated.
 
-    The class and its bases are checked in order of precedence: the class
-    itself then each base in the order they were given at class definition.
+    The class and its bases are checked in order
+    of precedence: the class itself then each base
+    in the order they were given at class definition.
 
-    Abstract classes do not generate a tablename, although they may have set
+    Abstract classes do not generate a tablename,
+    although they may have set
     or inherited a tablename elsewhere.
 
-    If a class defines a tablename or table, a new one will not be generated.
-    Otherwise, if the class defines a primary key, a new name will be generated.
+    If a class defines a tablename or table,
+    a new one will not be generated.
+    Otherwise, if the class defines a primary key,
+    a new name will be generated.
 
     This supports:
 
-    * Joined table inheritance without explicitly naming sub-models.
+    * Joined table inheritance without explicitly
+      naming sub-models.
     * Single table inheritance.
     * Inheriting from mixins or abstract models.
 
@@ -408,10 +414,14 @@ class SQLAlchemy(object):
 
     @property
     def engine(self):
-        """Gives access to the engine.  If the database configuration is bound
-        to a specific application (initialized with an application) this will
-        always return a database connection.  If however the current application
-        is used this might raise a :exc:`RuntimeError` if no application is
+        """Gives access to the engine.
+        If the database configuration is bound
+        to a specific application (initialized
+        with an application) this will
+        always return a database connection.
+        If however the current application
+        is used this might raise a :exc:`RuntimeError`
+        if no application is
         active at the moment.
         """
         return self.get_engine(self.get_app())

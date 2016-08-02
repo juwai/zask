@@ -320,8 +320,9 @@ class ZeroRPC(object):
 
     ZeroRPC extention provides a few powful middlewares.
 
-    Take ``CONFIG_ENDPOINT_MIDDLEWARE`` as example, which will resolve endpoint
-    according to the zask application configuration. To use that you can setup a
+    Take ``CONFIG_ENDPOINT_MIDDLEWARE`` as example,
+    which will resolve endpoint according to the
+    zask application configuration. To use that you can setup a
     ZeroRPC like this::
 
         app = Zask(__name__)
@@ -427,7 +428,10 @@ class ZeroRPC(object):
             error_handler = debug_handler()
         else:
             access_handler = TimedRotatingFileHandler(
-                self.app.config['ZERORPC_ACCESS_LOG'], when='D', interval=1, backupCount=15)
+                self.app.config['ZERORPC_ACCESS_LOG'],
+                when='D',
+                interval=1,
+                backupCount=15)
             error_handler = production_handler(self.app.config)
 
         access_handler.setLevel(INFO)
@@ -454,7 +458,9 @@ class _Server(zerorpc.Server):
         if methods is None:
             methods = self
 
-        context_ = context or _Server.__context__ or zerorpc.Context.get_instance()
+        context_ = context \
+            or _Server.__context__ \
+            or zerorpc.Context.get_instance()
         heartbeat = kargs.pop('heartbeat', None)
         zerorpc.Server.__init__(self,
                                 methods,
@@ -500,7 +506,9 @@ class _Client(zerorpc.Client):
         self._connect_to = connect_to
         self._service_version = version
         heartbeat = kargs.pop('heartbeat', None)
-        context_ = context or _Client.__context__ or zerorpc.Context.get_instance()
+        context_ = context \
+            or _Client.__context__ \
+            or zerorpc.Context.get_instance()
         # let this client handle connect all the time by setting
         # connect_to=None
         zerorpc.Client.__init__(
