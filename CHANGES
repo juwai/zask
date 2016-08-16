@@ -3,6 +3,14 @@ Zask Changelog
 
 Here you can see the full list of changes between each Zask release.
 
+Version 1.9.4
+-------------
+
+released on August 16th 2016
+
+* Fixed a bug that prevents Exceptions from properly propagating when there is no started_at in the event header
+
+
 Version 1.9.3
 -------------
 

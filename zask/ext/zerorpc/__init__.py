@@ -296,7 +296,7 @@ class AccessLogMiddleware(object):
             'referrer': '-',
             'user_agent': '-',
             'cookies': '-',
-            'request_time': _milli_time() - start,
+            'request_time': _milli_time() - start if start else 0,
             'uuid': uuid,
         })
 
