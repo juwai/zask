@@ -284,7 +284,6 @@ class AccessLogMiddleware(object):
 
     def server_inspect_exception(self, request_event, reply_event, task_context, exc_infos):
         start = request_event.header.get('started_at')
-        request_time = lambda s: _milli_time() - s if s else 0
         message = '"%s %s"' % (self._class_name, request_event.name)
         access_key = request_event.header.get('access_key', '-')
         uuid = request_event.header.get('uuid', '-')
@@ -297,7 +296,7 @@ class AccessLogMiddleware(object):
             'referrer': '-',
             'user_agent': '-',
             'cookies': '-',
-            'request_time': request_time(start),
+            'request_time': _milli_time() - start if start else 0,
             'uuid': uuid,
         })
 
