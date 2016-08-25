@@ -8,7 +8,7 @@ install:
     - pip install pep8 tox
 
 before_script:
-    - "pep8 --ignore=E123,E402,E501,E701 ./bin ./zask ./tests"
+    - "pep8 --ignore=E402 ./bin ./zask ./tests"
 
 script:
     - make test
