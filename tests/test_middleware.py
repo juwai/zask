@@ -7,6 +7,7 @@ from zask import Zask
 from zask.ext.zerorpc import *
 from testutils import random_ipc_endpoint
 
+
 def test_no_middleware_runtime():
     app = Zask(__name__)
     endpoint = random_ipc_endpoint()
@@ -143,7 +144,7 @@ def test_custom_header():
 
     app = Zask(__name__)
     endpoint = random_ipc_endpoint()
-    app.config['DEBUG'] = False # for testing accesslog
+    app.config['DEBUG'] = False  # for testing accesslog
     app.config['ZERORPC_SOME_SERVICE'] = {
         '2.0': endpoint,
         '1.0': endpoint,
@@ -162,7 +163,7 @@ def test_custom_header():
     client = rpc.Client('some_service')
     channel = client._multiplexer.channel()
     hbchan = HeartBeatOnChannel(channel, freq=client._heartbeat_freq,
-            passive=client._passive_heartbeat)
+                                passive=client._passive_heartbeat)
     bufchan = BufferedChannel(hbchan, inqueue_size=100)
     request_event = client._generate_request_event(bufchan, 'hello', None)
     assert request_event.header['access_key'] == 'key'

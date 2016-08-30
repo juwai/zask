@@ -27,15 +27,15 @@ with open('zask/__init__.py', 'rb') as f:
 
 
 setup(
-    name = 'Zask',
-    version = version,
+    name='Zask',
+    version=version,
     license='BSD',
-    author = 'J5',
+    author='J5',
     url='https://github.com/j-5/zask',
-    description = "Basic framework to use with ZeroRPC inspired by Flask",
+    description="Basic framework to use with ZeroRPC inspired by Flask",
     long_description=__doc__,
-    packages = find_packages(),
-    install_requires = [
+    packages=find_packages(),
+    install_requires=[
         'zerorpc==0.5.1',
         'sqlalchemy>=0.9.8, <1.0'
     ],

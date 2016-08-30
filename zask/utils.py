@@ -15,10 +15,12 @@
 import os
 import sys
 
+
 def get_root_path(import_name):
     mod = sys.modules.get(import_name)
     if mod is not None and hasattr(mod, '__file__'):
         return os.path.dirname(os.path.abspath(mod.__file__))
+
 
 def import_string(import_name, silent=False):
     """Imports an object based on a string.  This is useful if you want to
@@ -65,6 +67,7 @@ def import_string(import_name, silent=False):
                 ImportStringError,
                 ImportStringError(import_name, e),
                 sys.exc_info()[2])
+
 
 class ImportStringError(ImportError):
     """Provides information about a failed :func:`import_string` attempt."""

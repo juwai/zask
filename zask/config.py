@@ -12,7 +12,6 @@
     :license: BSD, see LICENSE for more details.
 """
 
-
 import imp
 import os
 import errno
@@ -20,6 +19,7 @@ import json
 
 from .utils import import_string
 from ._compat import string_types, iteritems
+
 
 class Config(dict):
     """Works exactly like a dict but provides ways to fill it from files
@@ -134,7 +134,6 @@ class Config(dict):
         for key in dir(obj):
             if key.isupper():
                 self[key] = getattr(obj, key)
-
 
     def get_namespace(self, namespace, lowercase=True, trim_namespace=True):
         """Returns a dictionary containing a subset of configuration options

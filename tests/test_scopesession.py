@@ -8,6 +8,7 @@ from zask.ext.zerorpc import *
 from zask.ext import sqlalchemy
 from testutils import random_ipc_endpoint
 
+
 def testing_scope_session():
     app = Zask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
@@ -25,6 +26,7 @@ def testing_scope_session():
             assert ctx == ctx2
 
     class Srv(rpc.Server):
+
         def get_session(self):
             ctx = _request_ctx.get_request_cxt()
             foo = Foo()
