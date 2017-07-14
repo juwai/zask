@@ -1,11 +1,13 @@
-import os
+# -*- coding: utf-8 -*-
+
 import atexit
 import unittest
 from datetime import datetime
+
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import Query as BaseQuery
 from zask import Zask
 from zask.ext import sqlalchemy
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import sessionmaker, Query as BaseQuery
 
 
 def make_todo_model(db):

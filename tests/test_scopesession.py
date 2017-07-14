@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-import pytest
-import gevent
-import zerorpc
 
-from zask import Zask, _request_ctx
-from zask.ext.zerorpc import *
-from zask.ext import sqlalchemy
 from testutils import random_ipc_endpoint
+from zask import Zask, _request_ctx
+from zask.ext import sqlalchemy
+from zask.ext.zerorpc import *
 
 
 def testing_scope_session():
