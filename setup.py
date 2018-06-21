@@ -37,7 +37,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'zerorpc>=0.5.1, <0.7',
-        'sqlalchemy>=0.9.8, <1.2'
+        'sqlalchemy>=0.9.8, <1.3'
     ],
     classifiers=[
         'Environment :: Other Environment',

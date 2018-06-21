@@ -354,6 +354,8 @@ class SQLAlchemy(object):
         # as we gonna run zask as a daemon, set pool_recycle as default
         app.config.setdefault('SQLALCHEMY_POOL_RECYCLE', 3600)
         app.config.setdefault('SQLALCHEMY_MAX_OVERFLOW', None)
+        if sqlalchemy.__version__.startswith('1.2'):
+            app.config.setdefault('POOL_PRE_PING', False)
 
         if not hasattr(app, 'extensions'):
             app.extensions = {}
@@ -368,6 +370,8 @@ class SQLAlchemy(object):
         _setdefault('pool_timeout', 'SQLALCHEMY_POOL_TIMEOUT')
         _setdefault('pool_recycle', 'SQLALCHEMY_POOL_RECYCLE')
         _setdefault('max_overflow', 'SQLALCHEMY_MAX_OVERFLOW')
+        if sqlalchemy.__version__.startswith('1.2'):
+            _setdefault('pool_pre_ping', 'POOL_PRE_PING')
 
     def apply_driver_hacks(self, app, info, options):
         """This method is called before engine creation and used to inject
