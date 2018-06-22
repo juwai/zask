@@ -3,6 +3,13 @@ Zask Changelog
 
 Here you can see the full list of changes between each Zask release.
 
+Version 1.9.6
+-------------
+
+released on June 21th 2018
+
+* Allow SQLAlchemy up to version 1.2.8
+* Use SQLAlchemy new feature pool_pre_ping
 
 Version 1.9.5
 -------------
