@@ -49,5 +49,27 @@ class TestLogging(unittest.TestCase):
         with open(app.config['ERROR_LOG'], 'r') as fin:
             print fin.read()
 
+    def test_prod_class(self):
+        app = Zask(__name__)
+        app.config = self.default_config
+        app.config['DEBUG'] = False
+        app.config['PRODUCTION_LOGGING_CLASS'] = 'WatchedFileHandler'
+
+        app.logger.debug("debug")
+        app.logger.info("info")
+        app.logger.warning("warning")
+        app.logger.error("error")
+        app.logger.exception("exception")
+
+        self.assertEqual(len(app.logger.handlers), 1)
+        hdlr = app.logger.handlers[0]
+        self.assertEqual(hdlr.__class__.__name__, 'WatchedFileHandler')
+
+        print ''
+        print 'printing file:'
+        with open(app.config['ERROR_LOG'], 'r') as fin:
+            print fin.read()
+
+
 if __name__ == '__main__':
     unittest.main()

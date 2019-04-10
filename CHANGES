@@ -3,6 +3,13 @@ Zask Changelog
 
 Here you can see the full list of changes between each Zask release.
 
+Version 1.9.7
+-------------
+
+released on April 10th 2019
+
+* Add new handler for production logger
+
 Version 1.9.6
 -------------
 

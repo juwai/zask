@@ -13,7 +13,7 @@ from __future__ import absolute_import
 
 from logging import getLogger, StreamHandler, Formatter, \
     DEBUG, INFO, WARNING, ERROR
-from logging.handlers import RotatingFileHandler
+from logging.handlers import RotatingFileHandler, WatchedFileHandler
 
 PROD_LOG_FORMAT = (
     '[%(asctime)s] ' +
@@ -35,9 +35,13 @@ def debug_handler():
 
 
 def production_handler(config):
-    handler = RotatingFileHandler(config['ERROR_LOG'],
-                                  maxBytes=1024 * 50,
-                                  backupCount=5)
+    if config.get('PRODUCTION_LOGGING_CLASS') == 'WatchedFileHandler':
+        handler = WatchedFileHandler(config['ERROR_LOG'])
+    else:
+        handler = RotatingFileHandler(config['ERROR_LOG'],
+                                      maxBytes=1024 * 50,
+                                      backupCount=5)
+
     handler.setLevel(_get_production_logging_level(config))
     handler.setFormatter(Formatter(PROD_LOG_FORMAT))
     return handler
