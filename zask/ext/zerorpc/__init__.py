@@ -211,6 +211,11 @@ class RequestChainMiddleware(object):
             setattr(_request_ctx.stash, 'uuid', str(uuid.uuid1()))
         return _request_ctx.stash.uuid
 
+    def get_origin_access_key(self):
+        if not hasattr(_request_ctx.stash, 'origin_access_key'):
+            return None
+        return _request_ctx.stash.origin_access_key
+
     def set_uuid(self, uuid):
         setattr(_request_ctx.stash, 'uuid', uuid)
 
@@ -225,9 +230,22 @@ class RequestChainMiddleware(object):
             })
         else:
             self.set_uuid(request_event.header.get('uuid'))
+        if request_event.header.get('origin_access_key'):
+            self.set_origin_access_key(
+                request_event.header.get('origin_access_key'))
+        elif request_event.header.get('access_key'):
+            self.set_origin_access_key(request_event.header.get('access_key'))
+
+    def set_origin_access_key(self, origin_access_key):
+        setattr(_request_ctx.stash, 'origin_access_key', origin_access_key)
+
+    def clear_origin_access_key(self):
+        if hasattr(_request_ctx.stash, 'origin_access_key'):
+            delattr(_request_ctx.stash, 'origin_access_key')
 
     def server_after_exec(self, request_event, reply_event):
         self.clear_uuid()
+        self.clear_origin_access_key()
 
     def server_inspect_exception(
             self,
@@ -242,6 +260,11 @@ class RequestChainMiddleware(object):
             event.header.update({
                 'uuid': self.get_uuid(),
             })
+        if not event.header.get('origin_access_key'):
+            if self.get_origin_access_key():
+                event.header.update({
+                    'origin_access_key': self.get_origin_access_key()
+                })
 
 
 class RequestEventMiddleware(object):
