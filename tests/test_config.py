@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import pytest
-
 import os
 
 from zask import Zask

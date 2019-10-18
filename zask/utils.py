@@ -20,6 +20,8 @@ def get_root_path(import_name):
     mod = sys.modules.get(import_name)
     if mod is not None and hasattr(mod, '__file__'):
         return os.path.dirname(os.path.abspath(mod.__file__))
+    else:
+        return ''    # return '', or os.path.join(None, 'x') cause exception
 
 
 def import_string(import_name, silent=False):

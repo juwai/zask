@@ -40,6 +40,7 @@ from zask.ext.sqlalchemy._compat import iteritems, itervalues, xrange, \
     string_types
 
 _camelcase_re = re.compile(r'([A-Z]+)(?=[a-z0-9])')
+PY2 = sys.version_info[0] == 2
 
 
 def _make_table(db):
@@ -335,6 +336,7 @@ class SQLAlchemy(object):
         """Creates the declarative base."""
         base = declarative_base(cls=Model, name='Model',
                                 metaclass=_BoundDeclarativeMeta)
+
         base.query = _QueryProperty(self)
         return base
 
@@ -480,12 +482,20 @@ class SQLAlchemy(object):
     def _execute_for_all_tables(self, app, bind, operation):
         app = self.get_app(app)
 
-        if bind == '__all__':
-            binds = [None] + list(app.config.get('SQLALCHEMY_BINDS') or ())
-        elif isinstance(bind, basestring) or bind is None:
-            binds = [bind]
+        if PY2:
+            if bind == '__all__':
+                binds = [None] + list(app.config.get('SQLALCHEMY_BINDS') or ())
+            elif isinstance(bind, basestring) or bind is None:
+                binds = [bind]
+            else:
+                binds = bind
         else:
-            binds = bind
+            if bind == '__all__':
+                binds = [None] + list(app.config.get('SQLALCHEMY_BINDS') or ())
+            elif isinstance(bind, str) or bind is None:
+                binds = [bind]
+            else:
+                binds = bind
 
         for bind in binds:
             tables = self.get_tables_for_bind(bind)

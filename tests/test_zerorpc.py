@@ -8,17 +8,13 @@
 import os
 import time
 import unittest
-import pytest
 import tempfile
 
-import zerorpc
-import gevent
 from zerorpc.channel import logger as channel_logger
 from zerorpc.gevent_zmq import logger as gevent_logger
 from zerorpc.core import logger as core_logger
 from zask import Zask
 from zask.ext.zerorpc import init_zerorpc, access_log
-from zask.logging import create_logger
 
 
 def clear_handlers():
@@ -48,7 +44,7 @@ class TestZeroRPC(unittest.TestCase):
         app.config = self.default_config
         init_zerorpc(app)
 
-        print ""
+        print('')
         channel_logger.error("error")
         gevent_logger.error("error")
         core_logger.error("error")
@@ -64,10 +60,10 @@ class TestZeroRPC(unittest.TestCase):
         gevent_logger.error("error")
         core_logger.error("error")
 
-        print ""
-        print "printing file:"
+        print('')
+        print('printing file:')
         with open(app.config['ERROR_LOG'], 'r') as fin:
-            print fin.read()
+            print(fin.read())
 
     def test_access_log(self):
         clear_handlers()
@@ -82,7 +78,7 @@ class TestZeroRPC(unittest.TestCase):
                 time.sleep(1)
 
         srv = MySrv()
-        print "Should print an access log:"
+        print('Should print an access log:')
         srv.sleep()
 
     def test_default_config(self):

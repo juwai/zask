@@ -14,7 +14,7 @@ def random_ipc_endpoint():
 def teardown():
     global _tmpfiles
     for tmpfile in _tmpfiles:
-        print 'unlink', tmpfile
+        print('unlink', tmpfile)
         try:
             os.unlink(tmpfile)
         except Exception:
